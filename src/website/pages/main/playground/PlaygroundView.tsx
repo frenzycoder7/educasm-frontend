@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { SessionStats, Stats } from "./interfaces";
-import { TestSettingsModal } from "./components/TestSettingsModal";
 import { TestView } from "./components/TestView";
 import { IQuestion } from "../../../apis/response_interfaces/question-interface";
 import { TestResultView } from './components/TestResultView';
@@ -21,16 +20,14 @@ const initialStats: Stats = {
 
 const initialSessionStats: SessionStats = {
     totalQuestions: 0,
-    sessionLimit: 25,
+    sessionLimit: 10,
     isSessionComplete: false,
 }
 
 export const PlaygroundView = () => {
-    const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-    const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [isTestStarted, setIsTestStarted] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState<IQuestion | null>(null);
-    const { mutate, isPending } = useGenerateQuestion();
+    const { mutate, isPending, error } = useGenerateQuestion();
     const { user, isLoggedIn } = useSelector((state: RootState) => state.user);
 
     const [isPaused, setIsPaused] = useState(false);
@@ -40,7 +37,7 @@ export const PlaygroundView = () => {
     const [timerInterval, setTimerInterval] = useState<ReturnType<typeof setInterval> | null>(null);
     const [sessionStats, setSessionStats] = useState<SessionStats>(initialSessionStats);
     const [stats, setStats] = useState<Stats>(initialStats);
-    const [timePerQuestion, setTimePerQuestion] = useState<number>(10);
+    const [timePerQuestion] = useState<number>(15);
     const [showResults, setShowResults] = useState(false);
 
     useEffect(() => {
@@ -75,41 +72,40 @@ export const PlaygroundView = () => {
         return <Navigate to="/" />
     }
 
-
-
-
-    const handleClearTopic = (topicToRemove: string) => {
-        setSelectedTopics(prev => prev.filter(topic => topic !== topicToRemove));
-    };
-
-    const handleSearch = (topic: string) => {
-        setSelectedTopics([...selectedTopics, topic]);
-    };
-
-    const handleStartTest = () => {
-        if (selectedTopics.length === 0) {
-            toast.error("Please select at least one topic");
-            return;
-        }
-        setShowSettingsModal(true);
-    };
-
-    const handleTestSettingsSubmit = (settings: { questionCount: number; }) => {
-        if (timePerQuestion < 10) {
-            toast.error("Please enter a number between 10 and 300");
-            return;
-        }
-        setShowSettingsModal(false);
+    const handleStartTest = (topic: string) => {
+        localStorage.removeItem('level');
+        localStorage.removeItem('topic');
+        localStorage.removeItem('wasCorrect');
+        localStorage.setItem("topic", topic);
         setSessionStats(prev => ({
             ...prev,
-            sessionLimit: settings.questionCount
+            sessionLimit: 10
         }));
         fetchQuestion();
         setIsTestStarted(true);
     };
 
+
     const fetchQuestion = () => {
-        mutate({ topic: selectedTopics.join(","), age, level: 1 }, {
+        let level = localStorage.getItem("level") ? parseInt(localStorage.getItem("level") || "0") : 1;
+        const wasCorrect = localStorage.getItem("wasCorrect") === "true";
+        if (wasCorrect) {
+            console.log("Previous question was correct increasing level" + level);
+            level += 1;
+            localStorage.setItem("level", level.toString());
+        } else {
+            if (level > 0) {
+                console.log("Previous question was incorrect decreasing level" + level);
+                level -= 1;
+                localStorage.setItem("level", level.toString());
+            }
+        }
+        const topic = localStorage.getItem("topic") || "";
+        console.log("Fetching question with level" + level);
+        console.log("Topic: " + topic);
+        console.log("Age: " + age);
+
+        mutate({ topic, age, level: level }, {
             onSuccess(data) {
                 setCurrentQuestion(data);
                 setSelectedAnswer(null);
@@ -142,6 +138,7 @@ export const PlaygroundView = () => {
         if (timerInterval) clearInterval(timerInterval);
 
         const isCorrect = index === currentQuestion.correctAnswer;
+        localStorage.setItem("wasCorrect", isCorrect.toString());
         setStats(prev => ({
             questions: prev.questions + 1,
             accuracy: ((prev.accuracy * prev.questions) + (isCorrect ? 100 : 0)) / (prev.questions + 1),
@@ -173,7 +170,8 @@ export const PlaygroundView = () => {
             ...initialSessionStats,
             sessionLimit: prev.sessionLimit
         }));
-        handleTestSettingsSubmit({ questionCount: sessionStats.sessionLimit });
+        const topic = localStorage.getItem("topic") || "";
+        handleStartTest(topic);
     };
 
     const handleClose = () => {
@@ -182,7 +180,6 @@ export const PlaygroundView = () => {
         setCurrentQuestion(null);
         setStats(initialStats);
         setSessionStats(initialSessionStats);
-        setSelectedTopics([]);
     };
 
     const togglePause = () => {
@@ -205,16 +202,15 @@ export const PlaygroundView = () => {
         <>
             {!isTestStarted ? (
                 <InitialViewComponent
-                    onSearch={handleSearch}
+                    onSearch={handleStartTest}
                     isPlayground={true}
-                    onStartTest={handleStartTest}
-                    selectedTopics={selectedTopics}
-                    onClearTopic={handleClearTopic}
+
                 />
             ) : (
                 <TestView
                     question={currentQuestion}
                     isLoading={isPending}
+                    error={error}
                     stats={{
                         accuracy: Math.round(stats.accuracy),
                         questionsAnswered: stats.questions,
@@ -231,12 +227,7 @@ export const PlaygroundView = () => {
                 />
             )}
 
-            <TestSettingsModal
-                isOpen={showSettingsModal}
-                onClose={() => setShowSettingsModal(false)}
-                onStart={handleTestSettingsSubmit}
-                setTimePerQuestion={setTimePerQuestion}
-            />
+
 
             {showResults && (
                 <TestResultView

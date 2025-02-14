@@ -4,17 +4,10 @@ import { motion } from 'framer-motion';
 export default function InitialViewComponent({
     onSearch,
     isPlayground = false,
-    onStartTest,
-    selectedTopics,
-    onClearTopic
 }: {
     onSearch: (query: string) => void,
     isPlayground: boolean,
-    onStartTest?: () => void,
-    selectedTopics?: string[],
-    onClearTopic?: (topic: string) => void
 }) {
-    console.log(selectedTopics)
     const container = {
         hidden: { opacity: 0 },
         show: {
@@ -61,8 +54,6 @@ export default function InitialViewComponent({
                         placeholder={isPlayground ? "Enter what you want to practice..." : "Enter what you want to explore..."}
                         centered={true}
                         className="bg-gray-900/80 backdrop-blur-lg"
-                        selectedTopics={selectedTopics}
-                        onClearTopic={onClearTopic}
                         isPlayground={isPlayground}
                     />
                     <p className="text-xs sm:text-sm text-gray-400 mt-2">
@@ -70,24 +61,7 @@ export default function InitialViewComponent({
                     </p>
                 </motion.div>
 
-                {isPlayground && onStartTest && (
-                    <motion.div
-                        variants={item}
-                        className="w-full flex justify-center"
-                    >
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={onStartTest}
-                            className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 
-                                text-white font-semibold text-lg shadow-lg hover:shadow-xl
-                                transition-all duration-300 hover:-translate-y-0.5
-                                border border-purple-400/30"
-                        >
-                            Start Test 🚀
-                        </motion.button>
-                    </motion.div>
-                )}
+
 
                 <motion.div
                     variants={item}

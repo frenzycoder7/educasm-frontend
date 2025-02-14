@@ -11,9 +11,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { motion } from "framer-motion";
 
-export default function MessagesComponent({ message, onRelatedQueryClick }: {
+export default function MessagesComponent({ message, onRelatedQueryClick, isLastMessageUser }: {
     message: IExploreContent,
     onRelatedQueryClick: (query: string) => void,
+    isLastMessageUser: boolean,
 }) {
     const { loadingMessageId, isLoading } = useSelector((state: RootState) => state.messages);
     const getMessage = (message: IExploreContent) => {
@@ -29,30 +30,32 @@ export default function MessagesComponent({ message, onRelatedQueryClick }: {
 
     return (
         <motion.div
-            className={`px-4 py-3 sm:px-6 sm:py-4 ${message.type === 'user' ? 'text-right' : 'text-left'}`}
+
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
         >
             {message.type === 'user' ? (
                 <div className="w-full">
-                    <div className="flex-1 text-base sm:text-lg font-semibold text-blue-200">
+                    <div className="flex-1 text-base sm:text-lg font-semibold mt-10">
                         {getMessage(message)}
                     </div>
                     {isThinking(message.messageId) && (
                         <motion.div
-                            className="flex items-center space-x-2 py-2 justify-end"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ repeat: Infinity, duration: 1.5 }}
+                            className={`flex items-start justify-start ${isThinking(message.messageId) ? 'h-[70vh]' : 'h-auto'}`}
                         >
-                            <LoadingAnimation />
-                            <span className="text-sm text-gray-400">Thinking...</span>
+                            <motion.div
+                                className="flex items-center justify-start"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                            >
+                                <LoadingAnimation />
+                                <span className="text-sm text-gray-400">Thinking...</span>
+                            </motion.div>
                         </motion.div>
                     )}
                 </div>
             ) : (
-                <div className="w-full space-y-4">
+                <div className={`${isLastMessageUser ? 'min-h-[70vh]' : 'h-auto'}`}>
                     <div className="flex-1 min-w-0">
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm, remarkMath]}
@@ -61,7 +64,7 @@ export default function MessagesComponent({ message, onRelatedQueryClick }: {
                                 ...MarkdownComponents,
                                 p: ({ children }) => (
                                     <motion.p
-                                        className="text-sm sm:text-base text-gray-300 my-1.5 leading-relaxed break-words"
+                                        className="text-sm sm:text-base my-1.5 leading-relaxed break-words"
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
@@ -75,7 +78,7 @@ export default function MessagesComponent({ message, onRelatedQueryClick }: {
                             {getMessage(message)}
                         </ReactMarkdown>
 
-                        {message.code && message.code.code !== "N/A" && message.code.code !== null && (
+                        {message.code && message.code.code !== "N/A" && message.code.code !== null && message.code.code !== "Not applicable" && (
                             <motion.div
                                 className="mt-4 bg-gray-900/50 rounded-lg p-4 border border-gray-700/50"
                                 initial={{ opacity: 0, y: 10 }}

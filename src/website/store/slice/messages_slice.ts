@@ -6,11 +6,13 @@ const _initialState: {
     loadingMessageId: string | null
     isLoading: boolean
     history: string[]
+    shouldScroll: boolean
 } = {
     messages: [],
     loadingMessageId: null,
     isLoading: false,
-    history: localStorage.getItem('history') ? JSON.parse(localStorage.getItem('history') || '') : []
+    history: localStorage.getItem('history') ? JSON.parse(localStorage.getItem('history') || '') : [],
+    shouldScroll: false
 }
 
 const messagesSlice = createSlice({
@@ -42,9 +44,12 @@ const messagesSlice = createSlice({
         clearHistory: (state) => {
             state.history = [];
             localStorage.removeItem('history');
+        },
+        setShouldScroll: (state, action) => {
+            state.shouldScroll = action.payload;
         }
     }
 })
 
-export const { addMessage, removeMessage, clearMessages, addMessages, setLoadingMessageId, addHistory, clearHistory } = messagesSlice.actions;
+export const { addMessage, removeMessage, clearMessages, addMessages, setLoadingMessageId, addHistory, clearHistory, setShouldScroll } = messagesSlice.actions;
 export default messagesSlice;

@@ -4,7 +4,15 @@ import MessagesComponent from './MessagesComponent'
 import { SearchBar } from './SearchBar'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function MessageListViewComponent({ messages, loadMessage, scrollRef }: { messages: IExploreContent[], loadMessage: (query: string) => void, scrollRef: React.RefObject<HTMLDivElement> }) {
+export default function MessageListViewComponent({
+    messages,
+    loadMessage,
+    scrollRef
+}: { messages: IExploreContent[], loadMessage: (query: string) => void, scrollRef: React.RefObject<HTMLDivElement> }) {
+    const messageCount = messages.length;
+    const isLastMessageUser = (index: number) => {
+        return index === messageCount - 1;
+    }
     return (
         <div className="fixed inset-x-0 top-16 bottom-0">
             <div className="h-full flex flex-col">
@@ -24,37 +32,14 @@ export default function MessageListViewComponent({ messages, loadMessage, scroll
                                             type: "spring",
                                             stiffness: 100
                                         }}
-                                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} group`}
+                                        className={`flex justify-start group`}
                                     >
-                                        {message.type !== 'user' && (
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mr-2 shadow-lg"
-                                            >
-                                                <span className="text-white text-sm">AI</span>
-                                            </motion.div>
-                                        )}
-                                        <div
-                                            className={`max-w-[85%] sm:max-w-[75%] transform transition-transform duration-200 hover:scale-[1.02] ${message.type === 'user'
-                                                ? 'bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-blue-500/30'
-                                                : 'bg-gradient-to-r from-gray-800/50 to-gray-700/50 border-gray-700/50'
-                                                } rounded-2xl border backdrop-blur-sm shadow-lg hover:shadow-xl`}
-                                        >
-                                            <MessagesComponent
-                                                message={message}
-                                                onRelatedQueryClick={loadMessage}
-                                            />
-                                        </div>
-                                        {message.type === 'user' && (
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center ml-2 shadow-lg"
-                                            >
-                                                <span className="text-white text-sm">You</span>
-                                            </motion.div>
-                                        )}
+                                        <MessagesComponent
+                                            message={message}
+                                            onRelatedQueryClick={loadMessage}
+                                            isLastMessageUser={isLastMessageUser(index)}
+                                        />
+
                                     </motion.div>
                                 ))}
                             </AnimatePresence>

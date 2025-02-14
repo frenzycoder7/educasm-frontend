@@ -18,6 +18,9 @@ export class API {
             age,
             level
         });
+        if (response.status !== 201) {
+            throw new Error(response.data.message);
+        }
         return response.data as IQuestion;
     }
 }

@@ -16,8 +16,6 @@ interface SearchBarProps {
   suggestions?: Array<{ text: string; icon: string }>;
   onSubmit?: (query: string) => void;
   buttonText?: string;
-  selectedTopics?: string[];
-  onClearTopic?: (topic: string) => void;
   isPlayground?: boolean;
 }
 
@@ -29,8 +27,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   initialValue = "",
   className,
   suggestions = [],
-  selectedTopics = [],
-  onClearTopic,
   isPlayground = false
 }) => {
   const [query, setQuery] = useState(initialValue);
@@ -113,40 +109,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <h1 className="text-4xl font-bold text-white mb-8">{title}</h1>
         </motion.div>
       )}
-      {selectedTopics && selectedTopics.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {selectedTopics.map((topic, index) => (
-            <motion.div
-              key={index}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="bg-purple-500/20 px-3 py-1 rounded-full flex items-center gap-2 border border-purple-500/30"
-            >
-              <span className="text-sm text-purple-300">{topic}</span>
-              {onClearTopic && (
-                <motion.button
-                  onClick={() => onClearTopic(topic)}
-                  className="text-purple-300 hover:text-purple-100 transition-colors"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </motion.button>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      )}
+
       <div className={`relative group ${centered ? "mx-auto" : ""}`}>
         <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
           <input

@@ -23,7 +23,9 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
     onClose,
 }) => {
     useEffect(() => {
-        // Trigger confetti animation when component mounts
+        localStorage.removeItem('level');
+        localStorage.removeItem('topic');
+        localStorage.removeItem('wasCorrect');
         confetti({
             particleCount: 100,
             spread: 70,
