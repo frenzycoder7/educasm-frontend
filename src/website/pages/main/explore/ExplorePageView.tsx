@@ -48,7 +48,7 @@ export const ExplorePageView = () => {
             type: 'user',
             content: query,
         }));
-        mutate({ query: query, age: user.age }, {
+        mutate({ query: query, age: user.age, followup: localStorage.getItem("followup") || "" }, {
             onSuccess(data) {
                 dispatch(setShouldScroll(false));
                 dispatch(addMessage(data));
@@ -72,9 +72,12 @@ export const ExplorePageView = () => {
 
 
     return (
-        <div className="w-full  flex flex-col">
+        <div className="flex flex-col">
             {messages.length == 0 ? (
-                <InitialViewComponent onSearch={loadMessage} isPlayground={false} />
+                <InitialViewComponent onSearch={(query) => {
+                    localStorage.setItem("followup", query);
+                    loadMessage(query);
+                }} isPlayground={false} />
             ) : (
                 <MessageListViewComponent messages={messages} loadMessage={loadMessage} scrollRef={scrollRef} />
             )}

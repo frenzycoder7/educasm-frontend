@@ -17,7 +17,7 @@ export default function MessageListViewComponent({
         <div className="fixed inset-x-0 top-16 bottom-0">
             <div className="h-full flex flex-col">
                 <div className="flex-1 overflow-y-auto">
-                    <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-24">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
                         <div className="py-8 space-y-4">
                             <AnimatePresence initial={false}>
                                 {messages.map((message, index) => (
@@ -26,20 +26,13 @@ export default function MessageListViewComponent({
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, x: message.type === 'user' ? 100 : -100 }}
-                                        transition={{
-                                            duration: 0.3,
-                                            delay: index * 0.1,
-                                            type: "spring",
-                                            stiffness: 100
-                                        }}
-                                        className={`flex justify-start group`}
+                                        transition={{ duration: 0.3 }}
                                     >
                                         <MessagesComponent
                                             message={message}
                                             onRelatedQueryClick={loadMessage}
                                             isLastMessageUser={isLastMessageUser(index)}
                                         />
-
                                     </motion.div>
                                 ))}
                             </AnimatePresence>

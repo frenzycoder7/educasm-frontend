@@ -163,12 +163,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 className="text-gray-400 group-hover:text-primary transition-colors duration-200"
+                onClick={() => {
+                  if (query) {
+                    onSearch(query);
+                    setQuery('');
+                  }
+                }}
               >
                 <svg
                   className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+
                 >
                   <path
                     strokeLinecap="round"
